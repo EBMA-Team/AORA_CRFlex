@@ -766,9 +766,32 @@ Adverse events were detected in 16% of surgical cases performed by SM over the l
 Write complications table for SM review
 
 ```{r}
+#| label: write-complic
+#| execute: false
 
+# Authenticate for sheets using the same token
+gs4_auth(token = drive_token())
+
+
+# CRFlexComp <- googlesheets4::gs4_create(
+#   "AORA_CRFlexComp",
+#   sheets = "Complications"
+# )
+
+sheet_write(
+  GMKComp |> dplyr::select(
+    -ComplicationOccurrence
+  ) |> filter(
+    ComplicationOccur2 != "No"
+  ),
+  ss = "https://docs.google.com/spreadsheets/d/13AcKTFGWuz_qZw3mNBRKSrta0CIEflUDZPohfLF26Cg?usp=drive_fs",
+  sheet = "Complications"
+)
 
 ```
+
+
+
 
 # Patient reported outcomes
 
@@ -1046,3 +1069,6 @@ KneeMultinomPlot <- ggplot(KneelResults, aes(x = odds_ratio, y = outcome)) +
 KneeMultinomPlot
 
 ```
+
+
+
