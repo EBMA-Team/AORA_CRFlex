@@ -21,6 +21,12 @@ format:
     link-external-newwindow: true
     link-external-icon: true
     
+    format:
+  docx:
+    toc: true
+    number-sections: true
+
+    
 execute: 
   echo: false
   warning: false
@@ -588,23 +594,7 @@ knitr::knit_print(cumulative_plot)
 
 ```
 
-```{r}
 
-BearingPlot <- GMKMaster |>
-  ggplot(aes(x = DateTreatment, y = CRTiming)) +
-  geom_point(alpha = 0.6, size = 2) +
-  labs(
-    title = "Cruciate retaining use over time",
-    x = "Date",
-    y = "Before or after first CR use"
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1)
-  )
-
-knitr::knit_print(BearingPlot)
-```
 
 # Baseline and Demographics
 
@@ -672,6 +662,24 @@ CRTiming = forcats::fct(
 )
 
 
+```
+
+```{r}
+
+BearingPlot <- GMKMaster |>
+  ggplot(aes(x = DateTreatment, y = CRTiming)) +
+  geom_point(alpha = 0.6, size = 2) +
+  labs(
+    title = "Cruciate retaining use over time",
+    x = "Date",
+    y = "Before or after first CR use"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+knitr::knit_print(BearingPlot)
 ```
 
 ```{r}
@@ -809,6 +817,9 @@ CRKOOSADL <- GMKMaster |> ggplot(
 
 knitr::knit_print(CRKOOSADL)
 ```
+
+
+Ran a multinomial logistic model to assess differences in kneeling difficulty at 3months followup before vs after introduction of flex bearing
 
 ```{r}
 
