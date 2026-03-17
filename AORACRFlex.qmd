@@ -1186,3 +1186,205 @@ KneelResultsBinom |>
 
 ```
 
+```{r}
+#| label: fig-model-sittostand1
+#| fig-cap: "Adjusted differences in incidence of responses for sit-to-stand difficulty at 6months between pre and post introduction of cr insert"
+
+# ─────────────────────────────────────────────
+# KOOS12 Sit-to-Stand (KOOS12DailyLivingQ1_6months)
+# ─────────────────────────────────────────────
+
+
+GMKMaster <- GMKMaster |>
+  mutate(
+    KOOS12DailyLivingQ1_6months = case_when(
+      KOOS12DailyLivingQ1_6months == "Extreme" ~ "Severe",
+      .default = KOOS12DailyLivingQ1_6months
+    ),
+    KOOS12DailyLivingQ1_6months = relevel(factor(KOOS12DailyLivingQ1_6months), ref = "Moderate"),
+    KOOS12DailyLivingQ1_6monthsAlt = case_when(
+      KOOS12DailyLivingQ1_6months %in% c("Moderate", "Severe") ~ "High",
+      KOOS12DailyLivingQ1_6months %in% c("Mild", "None")       ~ "Low",
+      .default = NA_character_
+    ),
+    KOOS12DailyLivingQ1_6monthsAlt = relevel(factor(KOOS12DailyLivingQ1_6monthsAlt), ref = "High")
+  )
+
+# Multinomial model
+MultiNommodel_SitStand <- nnet::multinom(
+  formula = KOOS12DailyLivingQ1_6months ~ CRTiming + AgeAtTreatment + Sex,
+  data    = GMKMaster
+)
+
+SitStandResults <- MultiNommodel_SitStand |>
+  tidy(conf.int = TRUE, exponentiate = TRUE) |>
+  filter(str_detect(term, "CRTiming")) |>
+  mutate(
+    across(c(estimate, conf.low, conf.high), ~round(., 2)),
+    p.value = round(p.value, 4)
+  ) |>
+  select(
+    outcome   = y.level,
+    term,
+    odds_ratio = estimate,
+    ci_lower   = conf.low,
+    ci_upper   = conf.high,
+    p.value
+  )
+
+SitStandResults |>
+  mutate(outcome = factor(outcome, levels = c("Severe", "None", "Moderate", "Mild"))) |>
+  ggplot(aes(x = odds_ratio, y = outcome)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2, orientation = "y") +
+  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey40") +
+  scale_x_continuous(limits = c(0, NA)) +
+  labs(
+    x = "Odds Ratio (95% CI)",
+    y = "Outcome Level"
+  ) +
+  theme_bw()
+
+```
+
+
+```{r}
+#| label: fig-model-sittostand2
+#| fig-cap: "Adjusted differences in incidence of low sit-to-stand difficulty at 6months relative to high difficulty between pre and post introduction of cr insert"
+
+BinomModel_SitStand <- glm(
+  formula = KOOS12DailyLivingQ1_6monthsAlt ~ CRTiming + AgeAtTreatment + Sex,
+  data    = GMKMaster,
+  family  = binomial
+)
+
+SitStandResultsBinom <- BinomModel_SitStand |>
+  tidy(conf.int = TRUE, exponentiate = TRUE) |>
+  filter(str_detect(term, "CRTiming")) |>
+  mutate(
+    across(c(estimate, conf.low, conf.high), ~round(., 2)),
+    p.value = round(p.value, 4)
+  ) |>
+  select(
+    term,
+    odds_ratio = estimate,
+    ci_lower   = conf.low,
+    ci_upper   = conf.high,
+    p.value
+  )
+
+SitStandResultsBinom |>
+  ggplot(aes(x = odds_ratio, y = term)) +
+  geom_point(size = 2) +
+  geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2) +
+  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey40") +
+  scale_x_continuous(limits = c(0, NA)) +
+  labs(
+    x = "Odds Ratio (95% CI)",
+    y = "Incidence Low Difficulty relative to High Difficulty"
+  ) +
+  theme_bw()
+
+```
+
+```{r}
+
+#| label: fig-model-vehicleegress1
+#| fig-cap: "Adjusted differences in incidence of responses for vehicle egress difficulty at 6months between pre and post introduction of cr insert"
+
+# ─────────────────────────────────────────────
+# KOOS12 Vehicle Egress (KOOS12DailyLivingQ3_6months)
+# ─────────────────────────────────────────────
+
+GMKMaster <- GMKMaster |>
+  mutate(
+    KOOS12DailyLivingQ3_6months = case_when(
+      KOOS12DailyLivingQ3_6months == "Extreme" ~ "Severe",
+      .default = KOOS12DailyLivingQ3_6months
+    ),
+    KOOS12DailyLivingQ3_6months = relevel(factor(KOOS12DailyLivingQ3_6months), ref = "Moderate"),
+    KOOS12DailyLivingQ3_6monthsAlt = case_when(
+      KOOS12DailyLivingQ3_6months %in% c("Moderate", "Severe") ~ "High",
+      KOOS12DailyLivingQ3_6months %in% c("Mild", "None")       ~ "Low",
+      .default = NA_character_
+    ),
+    KOOS12DailyLivingQ3_6monthsAlt = relevel(factor(KOOS12DailyLivingQ3_6monthsAlt), ref = "High")
+  )
+
+# Multinomial model
+MultiNommodel_VehicleEgress <- nnet::multinom(
+  formula = KOOS12DailyLivingQ3_6months ~ CRTiming + AgeAtTreatment + Sex,
+  data    = GMKMaster
+)
+
+VehicleEgressResults <- MultiNommodel_VehicleEgress |>
+  tidy(conf.int = TRUE, exponentiate = TRUE) |>
+  filter(str_detect(term, "CRTiming")) |>
+  mutate(
+    across(c(estimate, conf.low, conf.high), ~round(., 2)),
+    p.value = round(p.value, 4)
+  ) |>
+  select(
+    outcome    = y.level,
+    term,
+    odds_ratio = estimate,
+    ci_lower   = conf.low,
+    ci_upper   = conf.high,
+    p.value
+  )
+
+VehicleEgressResults |>
+  mutate(outcome = factor(outcome, levels = c("Severe", "None", "Moderate", "Mild"))) |>
+  ggplot(aes(x = odds_ratio, y = outcome)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2, orientation = "y") +
+  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey40") +
+  scale_x_continuous(limits = c(0, NA)) +
+  labs(
+    x = "Odds Ratio (95% CI)",
+    y = "Outcome Level"
+  ) +
+  theme_bw()
+
+```
+
+```{r}
+
+
+#| label: fig-model-vehicleegress2
+#| fig-cap: "Adjusted differences in incidence of low vehicle egress difficulty at 6months relative to high difficulty between pre and post introduction of cr insert"
+
+BinomModel_VehicleEgress <- glm(
+  formula = KOOS12DailyLivingQ3_6monthsAlt ~ CRTiming + AgeAtTreatment + Sex,
+  data    = GMKMaster,
+  family  = binomial
+)
+
+VehicleEgressResultsBinom <- BinomModel_VehicleEgress |>
+  tidy(conf.int = TRUE, exponentiate = TRUE) |>
+  filter(str_detect(term, "CRTiming")) |>
+  mutate(
+    across(c(estimate, conf.low, conf.high), ~round(., 2)),
+    p.value = round(p.value, 4)
+  ) |>
+  select(
+    term,
+    odds_ratio = estimate,
+    ci_lower   = conf.low,
+    ci_upper   = conf.high,
+    p.value
+  )
+
+VehicleEgressResultsBinom |>
+  ggplot(aes(x = odds_ratio, y = term)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2, orientation = "y") +
+  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey40") +
+  scale_x_continuous(limits = c(0, NA)) +
+  labs(
+    x = "Odds Ratio (95% CI)",
+    y = "Incidence Low Difficulty relative to High Difficulty"
+  ) +
+  theme_bw()
+```
+
