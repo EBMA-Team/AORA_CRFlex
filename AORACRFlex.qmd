@@ -68,6 +68,7 @@ pacman::p_load(# Load required packages
   "tidymodels",
   "lubridate",
   "consort",
+  "gt",
   "gtsummary",
   "survival",
   "ggplot2",
@@ -79,6 +80,7 @@ pacman::p_load(# Load required packages
   "quantreg",
   "broom",
   "epoxy",
+  "glue",
   "broom.helpers",
   "stringr"
   )
@@ -891,6 +893,83 @@ tbl_stacked <- tbl_stack(
 knitr::knit_print(tbl_stacked)
 
 ```
+
+
+```{r}
+#| label: tbl-proms2
+#| tbl-cap: "Summary of 6month KOOS scores adjusted for baseline, age and sex"
+
+# ── 1. Fit models ────────────────────────────────────────────────────────────
+
+fit_ancova <- function(data, outcome, baseline_cov) {
+  as.formula(
+    paste(outcome, "~ CRTiming +", baseline_cov, "+ AgeAtTreatment + Sex")
+  ) |>
+    lm(data = data)
+}
+
+fit_dl    <- fit_ancova(GMKMaster, "KOOS12_DailyLiving_TotalScore_6months", "KOOS12_DailyLiving_TotalScore_Preop")
+fit_pain  <- fit_ancova(GMKMaster, "KOOS12_Pain_TotalScore_6months",        "KOOS12_Pain_TotalScore_Preop")
+fit_total <- fit_ancova(GMKMaster, "KOOS12_Summary_TotalScore_6months",     "KOOS12_Summary_TotalScore_Preop")
+
+
+# ── 2. Extract avg marginal predictions per model ───────────────────────────
+
+extract_preds <- function(fit, col_label) {
+  
+  # Subset to only the columns used in the model
+  model_vars <- all.vars(formula(fit))
+  newdata    <- fit$model |> select(all_of(model_vars))
+  
+  invisible(avg_predictions(fit, variables = "CRTiming", newdata = newdata) |>
+    as_tibble() |>
+    mutate(
+      cell = glue("{round(estimate, 1)} ({round(conf.low, 1)}, {round(conf.high, 1)})")
+    ) |>
+    select(CRTiming, cell) |>
+    rename(!!col_label := cell)
+  )
+}
+
+tbl_dl_pred    <- extract_preds(fit_dl,    "Daily Living")
+tbl_pain_pred  <- extract_preds(fit_pain,  "Pain")
+tbl_total_pred <- extract_preds(fit_total, "Total")
+
+
+# ── 3. Merge and render gt table ─────────────────────────────────────────────
+
+tbl_combined <- tbl_dl_pred |>
+  left_join(tbl_pain_pred,  by = "CRTiming") |>
+  left_join(tbl_total_pred, by = "CRTiming") |>
+  rename(Group = CRTiming)
+
+tbl_combined |>
+  gt() |>
+  tab_header(
+    title    = "Model-Predicted KOOS-12 Scores at 6 Months",
+    subtitle = "Adjusted marginal means (95% CI) by CRTiming group"
+  ) |>
+  tab_spanner(
+    label   = "KOOS-12 Subscale",
+    columns = c("Daily Living", "Pain", "Total")
+  ) |>
+  tab_style(
+    style     = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style     = cell_text(weight = "bold"),
+    locations = cells_body(columns = Group)
+  ) |>
+  tab_footnote(
+    footnote  = "Adjusted marginal means from ANCOVA, computed at observed covariate values (age, sex, baseline score).",
+    locations = cells_title(groups = "subtitle")
+  ) |>
+  opt_row_striping() |>
+  opt_table_font(font = google_font("Source Sans Pro"))
+
+```
+
 
 
 ```{r}
