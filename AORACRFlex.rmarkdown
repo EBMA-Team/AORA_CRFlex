@@ -33,9 +33,15 @@ execute:
   message: false
 ---
 
+
+
+
 # Preamble
 
 The following analysis is a report on the activity, quality and data contained in the AORA registry.
+
+
+
 
 ```{r}
 #| label: load-packages
@@ -86,7 +92,13 @@ pacman::p_load(# Load required packages
   
 ```
 
+
+
+
 Access to the AORA datasets was pre-authorised.
+
+
+
 
 ```{r}
 #| label: auth2
@@ -103,7 +115,13 @@ googledrive::drive_auth(
   )
 ```
 
+
+
+
 A function was generated to retrieve files to call on later in the analysis for processing data imports.
+
+
+
 
 ```{r}
 #| label: folder
@@ -147,7 +165,13 @@ get_specific_snapshot <- function(folder_name, base_folder_id = base_folder_id1)
 }
 ```
 
+
+
+
 Data was retrieved from live database tables. Source files were specified and stored as global variables to call on in further functions.
+
+
+
 
 ```{r}
 #| label: live-table
@@ -253,7 +277,13 @@ IntHistoryCol <- googlesheets4::range_read(
 
 ```
 
+
+
+
 ## Retrieve MMM
+
+
+
 
 ```{r}
 
@@ -338,7 +368,13 @@ KneeIntraop <- googlesheets4::range_read(
   )
 ```
 
+
+
+
 A static registry snapshot was retrieved and formatted based on the fixed date of preparation of the snapshot (01-Dec-2025).
+
+
+
 
 ```{r}
 
@@ -396,6 +432,9 @@ STROBEInput <- openxlsx2::wb_to_df(
 
 ```
 
+
+
+
 # Context
 
 The Arthroplasty Outcomes in Regional Australia (AORA) registry has been in operation since June 2020, collecting KneeArthritis and HipArthritis presentations to a private clinic in Grafton, NSW. The setup of the registry is detailed on the [registry wiki](https://sites.google.com/ebma.com.au/aora-registry-wiki/home). The registry started with two surgeons contributing with one surgeon stopping participation in December 2022.
@@ -405,6 +444,9 @@ The Arthroplasty Outcomes in Regional Australia (AORA) registry has been in oper
 Flowcharts as per STROBE [@Vandenbroucke2007] and RECORD [@Benchimol2015] guidelines were generated for treatments enrolled into the Registry. Followup was set to eligibility at 3months followup.
 
 Need to identify GMKSubset to flag in STROBEInput for flowchart
+
+
+
 
 ```{r}
 
@@ -539,7 +581,13 @@ knitr::knit_print(STROBEPlot1)
 
 ```
 
+
+
+
 Cumulative recruitment over time was plotted from Registry inception to the present.
+
+
+
 
 ```{r}
 #| label: fig-progress
@@ -597,7 +645,13 @@ knitr::knit_print(cumulative_plot)
 
 
 
+
+
+
 # Baseline and Demographics
+
+
+
 
 ```{r}
 GMKMaster <- Snapshot |> filter(
@@ -713,7 +767,13 @@ Tableflexdemo <- gtsummary::tbl_summary(
 knitr::knit_print(Tableflexdemo)
 ```
 
+
+
+
 # Complications
+
+
+
 
 ```{r}
 GMKComp <- GMKMaster |> dplyr::select(
@@ -770,9 +830,15 @@ knitr::knit_print(TableGMKComp)
 
 ```
 
+
+
+
 Adverse events were detected in 16% of surgical cases performed by SM over the life of the registry as shown in @tbl-comp, with an average detection with 30 days of surgery.
 
 Write complications table for SM review
+
+
+
 
 ```{r}
 #| label: write-complic
@@ -802,7 +868,13 @@ sheet_write(
 
 
 
+
+
+
 # Patient reported outcomes
+
+
+
 
 ```{r}
 
@@ -820,7 +892,13 @@ knitr::knit_print(CRKOOSADL)
 ```
 
 
+
+
+
 Ran a multinomial logistic model to assess differences in kneeling difficulty at 3months followup before vs after introduction of flex bearing
+
+
+
 
 ```{r}
 
@@ -891,7 +969,6 @@ tbl_stacked <- tbl_stack(
 knitr::knit_print(tbl_stacked)
 
 ```
-
 
 ```{r}
 #| label: fig-kneeling
@@ -993,12 +1070,9 @@ ADLPlot4 <- make_adl_plot(ADLPlotData3, KOOS12DailyLivingQ4_3months, "Twisting d
 (ADLPlot1 + ADLPlot2) / (ADLPlot3 + ADLPlot4)
 ```
 
-
 ```{r}
 knitr::knit_print(KneelPlot)
 ```
-
-
 
 ```{r}
 #| label: fig-model-kneeling1
@@ -1061,7 +1135,6 @@ KneelResults |>
   ) +
   theme_bw()
 ```
-
 
 ```{r}
 #| label: fig-model-kneeling2
