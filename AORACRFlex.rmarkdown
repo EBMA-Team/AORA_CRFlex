@@ -441,7 +441,7 @@ The Arthroplasty Outcomes in Regional Australia (AORA) registry has been in oper
 
 # Recruitment Flow
 
-Flowcharts as per STROBE [@Vandenbroucke2007] and RECORD [@Benchimol2015] guidelines were generated for treatments enrolled into the Registry. Followup was set to eligibility at 3months followup.
+Flowcharts as per STROBE [@Vandenbroucke2007] and RECORD [@Benchimol2015] guidelines were generated for treatments enrolled into the Registry. Followup was set to eligibility at 6months followup.
 
 Need to identify GMKSubset to flag in STROBEInput for flowchart
 
@@ -464,7 +464,7 @@ STROBEFlow <- STROBEInput |> left_join(
         TreatmentID,
         CombID,
         EligibleAtPreop,
-        EligibleAtx3months,
+        EligibleAtx6months,
         EligibleAtx6months,
         SurgicalTreatment2
       ) |> 
@@ -529,7 +529,7 @@ followup = if_else(
   NA_character_
 ),
 lost_followup = if_else(
-  EligibleAtx3months != "Yes",
+  EligibleAtx6months != "Yes",
   "Not eligible for followup",
   NA_character_
 ),
@@ -879,7 +879,7 @@ sheet_write(
 ```{r}
 
 CRKOOSADL <- GMKMaster |> ggplot(
-  aes(y = KOOS12_DailyLiving_TotalScore_3months, x = CRTiming)) +
+  aes(y = KOOS12_DailyLiving_TotalScore_6months, x = CRTiming)) +
   geom_dots() +
   stat_halfeye(
     alpha = 0.5,  # Transparency for overlap visibility
@@ -895,7 +895,7 @@ knitr::knit_print(CRKOOSADL)
 
 
 
-Ran a multinomial logistic model to assess differences in kneeling difficulty at 3months followup before vs after introduction of flex bearing
+Ran a multinomial logistic model to assess differences in kneeling difficulty at 6months followup before vs after introduction of flex bearing
 
 
 
@@ -921,21 +921,21 @@ ancova_tbl <- function(data, outcome, baseline_cov, label) {
 
 tbl_dl <- ancova_tbl(
   data         = GMKMaster,
-  outcome      = "KOOS12_DailyLiving_TotalScore_3months",
+  outcome      = "KOOS12_DailyLiving_TotalScore_6months",
   baseline_cov = "KOOS12_DailyLiving_TotalScore_Preop",
   label        = "Daily Living"
 )
 
 tbl_pain <- ancova_tbl(
   data         = GMKMaster,
-  outcome      = "KOOS12_Pain_TotalScore_3months",
+  outcome      = "KOOS12_Pain_TotalScore_6months",
   baseline_cov = "KOOS12_Pain_TotalScore_Preop",
   label        = "Pain"
 )
 
 tbl_total <- ancova_tbl(
   data         = GMKMaster,
-  outcome      = "KOOS12_Summary_TotalScore_3months",
+  outcome      = "KOOS12_Summary_TotalScore_6months",
   baseline_cov = "KOOS12_Summary_TotalScore_Preop",
   label        = "Total"
 )
@@ -972,7 +972,7 @@ knitr::knit_print(tbl_stacked)
 
 ```{r}
 #| label: fig-kneeling
-#| fig-cap: "Response patterns of kneeling and daily living difficulty at 3months before vs after introduction of cr bearing"
+#| fig-cap: "Response patterns of kneeling and daily living difficulty at 6months before vs after introduction of cr bearing"
 #| fig-width: 8
 #| fig-height: 7
 #| dpi: 300
@@ -988,14 +988,14 @@ names(pal_4) <- c("Severe", "Moderate", "Mild", "None")
 
 # ── Kneeling ──────────────────────────────────────────────────────────────────
 KneelPlotData <- GMKMaster |>
-  filter(!is.na(Kneeling_3months)) |>
+  filter(!is.na(Kneeling_6months)) |>
   mutate(
-    Kneeling_3months = forcats::fct(
-      Kneeling_3months,
+    Kneeling_6months = forcats::fct(
+      Kneeling_6months,
       levels = c("Extreme", "Severe", "Moderate", "Mild", "None")
     )
   ) |>
-  count(CRTiming, Kneeling_3months) |>
+  count(CRTiming, Kneeling_6months) |>
   group_by(CRTiming) |>
   mutate(
     proportion = n / sum(n),
@@ -1003,7 +1003,7 @@ KneelPlotData <- GMKMaster |>
   ) |>
   ungroup()
 
-KneelPlot <- ggplot(KneelPlotData, aes(x = CRTiming, y = proportion, fill = Kneeling_3months)) +
+KneelPlot <- ggplot(KneelPlotData, aes(x = CRTiming, y = proportion, fill = Kneeling_6months)) +
   geom_col(position = "fill") +
   geom_text(
     aes(label = paste0(percentage, "%")),
@@ -1020,11 +1020,11 @@ KneelPlot <- ggplot(KneelPlotData, aes(x = CRTiming, y = proportion, fill = Knee
 ADLPlotData <- GMKMaster |>
   dplyr::select(
     TreatmentID, CRTiming,
-    contains("DailyLiving") & contains("3months")
+    contains("DailyLiving") & contains("6months")
   ) |>
   mutate(
     across(
-      c(KOOS12DailyLivingQ1_3months, KOOS12DailyLivingQ2_3months, KOOS12DailyLivingQ3_3months, KOOS12DailyLivingQ4_3months),
+      c(KOOS12DailyLivingQ1_6months, KOOS12DailyLivingQ2_6months, KOOS12DailyLivingQ3_6months, KOOS12DailyLivingQ4_6months),
       ~ forcats::fct(., levels = c("Extreme", "Severe", "Moderate", "Mild", "None"))
     )
   )
@@ -1041,10 +1041,10 @@ make_adl_data <- function(data, var) {
     ungroup()
 }
 
-ADLPlotData1 <- make_adl_data(ADLPlotData, KOOS12DailyLivingQ1_3months)
-ADLPlotData1 <- make_adl_data(ADLPlotData, KOOS12DailyLivingQ2_3months)
-ADLPlotData2 <- make_adl_data(ADLPlotData, KOOS12DailyLivingQ3_3months)
-ADLPlotData3 <- make_adl_data(ADLPlotData, KOOS12DailyLivingQ4_3months)
+ADLPlotData1 <- make_adl_data(ADLPlotData, KOOS12DailyLivingQ1_6months)
+ADLPlotData2 <- make_adl_data(ADLPlotData, KOOS12DailyLivingQ2_6months)
+ADLPlotData3 <- make_adl_data(ADLPlotData, KOOS12DailyLivingQ3_6months)
+ADLPlotData4 <- make_adl_data(ADLPlotData, KOOS12DailyLivingQ4_6months)
 
 make_adl_plot <- function(data, fill_var, legend_title, palette) {
   ggplot(data, aes(x = CRTiming, y = proportion, fill = {{ fill_var }})) +
@@ -1061,10 +1061,10 @@ make_adl_plot <- function(data, fill_var, legend_title, palette) {
     theme_minimal()
 }
 
-ADLPlot1 <- make_adl_plot(ADLPlotData1, KOOS12DailyLivingQ1_3months, "Sit-stand difficulty",      pal_4)
-ADLPlot2 <- make_adl_plot(ADLPlotData1, KOOS12DailyLivingQ2_3months, "Standing difficulty",      pal_4)
-ADLPlot3 <- make_adl_plot(ADLPlotData2, KOOS12DailyLivingQ3_3months, "Vehicle egress difficulty",  pal_4)
-ADLPlot4 <- make_adl_plot(ADLPlotData3, KOOS12DailyLivingQ4_3months, "Twisting difficulty",        pal_4)
+ADLPlot1 <- make_adl_plot(ADLPlotData1, KOOS12DailyLivingQ1_6months, "Sit-stand difficulty",      pal_4)
+ADLPlot2 <- make_adl_plot(ADLPlotData2, KOOS12DailyLivingQ2_6months, "Standing difficulty",      pal_4)
+ADLPlot3 <- make_adl_plot(ADLPlotData3, KOOS12DailyLivingQ3_6months, "Vehicle egress difficulty",  pal_4)
+ADLPlot4 <- make_adl_plot(ADLPlotData4, KOOS12DailyLivingQ4_6months, "Twisting difficulty",        pal_4)
 
 # ── Combine ───────────────────────────────────────────────────────────────────
 (ADLPlot1 + ADLPlot2) / (ADLPlot3 + ADLPlot4)
@@ -1076,31 +1076,31 @@ knitr::knit_print(KneelPlot)
 
 ```{r}
 #| label: fig-model-kneeling1
-#| fig-cap: "Adjusted differences in incidence of responses for kneeling difficulty at 3months between pre and post introduction of cr insert"
+#| fig-cap: "Adjusted differences in incidence of responses for kneeling difficulty at 6months between pre and post introduction of cr insert"
 
 
 
 # Collapse Extreme into Severe, then set reference level
 GMKMaster <- GMKMaster |>
   mutate(
-    Kneeling_3months = case_when(
-      Kneeling_3months == "Extreme" ~ "Severe",
-      .default = Kneeling_3months
+    Kneeling_6months = case_when(
+      Kneeling_6months == "Extreme" ~ "Severe",
+      .default = Kneeling_6months
     ),
-    Kneeling_3months = relevel(factor(Kneeling_3months), ref = "Moderate"),
-    Kneeling_3monthsAlt = case_when(
-      Kneeling_3months %in% c("Moderate", "Severe") ~ "High",
-      Kneeling_3months %in% c("Mild", "None") ~ "Low",
+    Kneeling_6months = relevel(factor(Kneeling_6months), ref = "Moderate"),
+    Kneeling_6monthsAlt = case_when(
+      Kneeling_6months %in% c("Moderate", "Severe") ~ "High",
+      Kneeling_6months %in% c("Mild", "None") ~ "Low",
       .default = NA_character_
     ),
-    Kneeling_3monthsAlt = relevel(factor(Kneeling_3monthsAlt), ref = "High")
+    Kneeling_6monthsAlt = relevel(factor(Kneeling_6monthsAlt), ref = "High")
   )
 
 # Fit multinomial logistic regression
 # Adjusting for age and sex
 # The first level of categorical_outcome will be the reference category
 MultiNommodel <- nnet::multinom(
-  formula = Kneeling_3months ~ CRTiming + AgeAtTreatment + Sex,
+  formula = Kneeling_6months ~ CRTiming + AgeAtTreatment + Sex,
   data = GMKMaster
 )
 
@@ -1138,13 +1138,13 @@ KneelResults |>
 
 ```{r}
 #| label: fig-model-kneeling2
-#| fig-cap: "Adjusted differences in incidence of low kneeling difficulty at 3months relative to high difficulty between pre and post introduction of cr insert"
+#| fig-cap: "Adjusted differences in incidence of low kneeling difficulty at 6months relative to high difficulty between pre and post introduction of cr insert"
 
 # Fit binomial logistic regression
 # Adjusting for age and sex
 # High is the reference category (odds of being Low vs High)
 BinomModel <- glm(
-  formula = Kneeling_3monthsAlt ~ CRTiming + AgeAtTreatment + Sex,
+  formula = Kneeling_6monthsAlt ~ CRTiming + AgeAtTreatment + Sex,
   data    = GMKMaster,
   family  = binomial
 )
