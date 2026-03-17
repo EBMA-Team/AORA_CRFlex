@@ -1288,7 +1288,6 @@ SitStandResultsBinom |>
 ```
 
 ```{r}
-
 #| label: fig-model-vehicleegress1
 #| fig-cap: "Adjusted differences in incidence of responses for vehicle egress difficulty at 6months between pre and post introduction of cr insert"
 
@@ -1349,8 +1348,6 @@ VehicleEgressResults |>
 ```
 
 ```{r}
-
-
 #| label: fig-model-vehicleegress2
 #| fig-cap: "Adjusted differences in incidence of low vehicle egress difficulty at 6months relative to high difficulty between pre and post introduction of cr insert"
 
