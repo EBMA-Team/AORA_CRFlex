@@ -1115,7 +1115,8 @@ KneelResults <- MultiNommodel |>
   filter(str_detect(term, "CRTiming")) |>
   mutate(
     across(c(estimate, conf.low, conf.high), ~round(., 2)),
-    p.value = round(p.value, 4)
+    p.value = round(p.value, 4),
+    label = glue::glue("{estimate} ({conf.low}, {conf.high})")
   ) |>
   select(
     outcome = y.level,
@@ -1123,7 +1124,8 @@ KneelResults <- MultiNommodel |>
     odds_ratio = estimate,
     ci_lower = conf.low,
     ci_upper = conf.high,
-    p.value
+    p.value,
+    label
   )
 
 # Plot
@@ -1131,7 +1133,12 @@ KneelResults |>
   mutate(outcome = factor(outcome, levels = c("Severe", "None", "Moderate", "Mild"))) |>
   ggplot(aes(x = odds_ratio, y = outcome)) +
   geom_point(size = 2) +
-  geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2) +
+  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2, orientation = "y") +
+   geom_text(
+    aes(label = label),
+    vjust  = -0.8,
+    size   = 3.5
+  ) +
   geom_vline(xintercept = 1, linetype = "dashed", colour = "grey40") +
   scale_x_continuous(limits = c(0, NA)) +
   labs(
@@ -1161,14 +1168,16 @@ KneelResultsBinom <- BinomModel |>
   filter(str_detect(term, "CRTiming")) |>
   mutate(
     across(c(estimate, conf.low, conf.high), ~round(., 2)),
-    p.value = round(p.value, 4)
+    p.value = round(p.value, 4),
+    label = glue::glue("{estimate} ({conf.low}, {conf.high})")
   ) |>
   select(
     term,
     odds_ratio = estimate,
     ci_lower  = conf.low,
     ci_upper  = conf.high,
-    p.value
+    p.value,
+    label
   )
 
 # Plot
@@ -1176,6 +1185,11 @@ KneelResultsBinom |>
   ggplot(aes(x = odds_ratio, y = term)) +
   geom_point(size = 2) +
   geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2) +
+   geom_text(
+    aes(label = label),
+    vjust  = -0.8,
+    size   = 3.5
+  ) +
   geom_vline(xintercept = 1, linetype = "dashed", colour = "grey40") +
   scale_x_continuous(limits = c(0, NA)) +
   labs(
@@ -1221,7 +1235,8 @@ SitStandResults <- MultiNommodel_SitStand |>
   filter(str_detect(term, "CRTiming")) |>
   mutate(
     across(c(estimate, conf.low, conf.high), ~round(., 2)),
-    p.value = round(p.value, 4)
+    p.value = round(p.value, 4),
+    label = glue::glue("{estimate} ({conf.low}, {conf.high})")
   ) |>
   select(
     outcome   = y.level,
@@ -1229,7 +1244,8 @@ SitStandResults <- MultiNommodel_SitStand |>
     odds_ratio = estimate,
     ci_lower   = conf.low,
     ci_upper   = conf.high,
-    p.value
+    p.value,
+    label
   )
 
 SitStandResults |>
@@ -1237,6 +1253,11 @@ SitStandResults |>
   ggplot(aes(x = odds_ratio, y = outcome)) +
   geom_point(size = 2) +
   geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2, orientation = "y") +
+   geom_text(
+    aes(label = label),
+    vjust  = -0.8,
+    size   = 3.5
+  ) +
   geom_vline(xintercept = 1, linetype = "dashed", colour = "grey40") +
   scale_x_continuous(limits = c(0, NA)) +
   labs(
@@ -1263,20 +1284,27 @@ SitStandResultsBinom <- BinomModel_SitStand |>
   filter(str_detect(term, "CRTiming")) |>
   mutate(
     across(c(estimate, conf.low, conf.high), ~round(., 2)),
-    p.value = round(p.value, 4)
+    p.value = round(p.value, 4),
+    label = glue::glue("{estimate} ({conf.low}, {conf.high})")
   ) |>
   select(
     term,
     odds_ratio = estimate,
     ci_lower   = conf.low,
     ci_upper   = conf.high,
-    p.value
+    p.value,
+    label
   )
 
 SitStandResultsBinom |>
   ggplot(aes(x = odds_ratio, y = term)) +
   geom_point(size = 2) +
   geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2) +
+   geom_text(
+    aes(label = label),
+    vjust  = -0.8,
+    size   = 3.5
+  ) +
   geom_vline(xintercept = 1, linetype = "dashed", colour = "grey40") +
   scale_x_continuous(limits = c(0, NA)) +
   labs(
@@ -1321,7 +1349,8 @@ VehicleEgressResults <- MultiNommodel_VehicleEgress |>
   filter(str_detect(term, "CRTiming")) |>
   mutate(
     across(c(estimate, conf.low, conf.high), ~round(., 2)),
-    p.value = round(p.value, 4)
+    p.value = round(p.value, 4),
+    label = glue::glue("{estimate} ({conf.low}, {conf.high})")
   ) |>
   select(
     outcome    = y.level,
@@ -1329,7 +1358,8 @@ VehicleEgressResults <- MultiNommodel_VehicleEgress |>
     odds_ratio = estimate,
     ci_lower   = conf.low,
     ci_upper   = conf.high,
-    p.value
+    p.value,
+    label
   )
 
 VehicleEgressResults |>
@@ -1337,6 +1367,11 @@ VehicleEgressResults |>
   ggplot(aes(x = odds_ratio, y = outcome)) +
   geom_point(size = 2) +
   geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2, orientation = "y") +
+   geom_text(
+    aes(label = label),
+    vjust  = -0.8,
+    size   = 3.5
+  ) +
   geom_vline(xintercept = 1, linetype = "dashed", colour = "grey40") +
   scale_x_continuous(limits = c(0, NA)) +
   labs(
@@ -1362,20 +1397,27 @@ VehicleEgressResultsBinom <- BinomModel_VehicleEgress |>
   filter(str_detect(term, "CRTiming")) |>
   mutate(
     across(c(estimate, conf.low, conf.high), ~round(., 2)),
-    p.value = round(p.value, 4)
+    p.value = round(p.value, 4),
+    label = glue::glue("{estimate} ({conf.low}, {conf.high})")
   ) |>
   select(
     term,
     odds_ratio = estimate,
     ci_lower   = conf.low,
     ci_upper   = conf.high,
-    p.value
+    p.value,
+    label
   )
 
 VehicleEgressResultsBinom |>
   ggplot(aes(x = odds_ratio, y = term)) +
   geom_point(size = 2) +
   geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2, orientation = "y") +
+  geom_text(
+    aes(label = label),
+    vjust  = -0.8,
+    size   = 3.5
+  ) +
   geom_vline(xintercept = 1, linetype = "dashed", colour = "grey40") +
   scale_x_continuous(limits = c(0, NA)) +
   labs(
