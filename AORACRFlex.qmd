@@ -695,6 +695,7 @@ Tableflexdemo <- gtsummary::tbl_summary(
     AgeAtTreatment,
     Sex,
     EducationLevel,
+    BilateralStatus,
     mmm_label,
     SACQ_score,
     MODEMExp,
