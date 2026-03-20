@@ -42,6 +42,7 @@ The following analysis is a report on the activity, quality and data contained i
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(# Load required packages
+  "epoxy",
   "patchwork",
   "nnet",
   "mgcv",
@@ -823,7 +824,66 @@ knitr::knit_print(CRKOOSADL)
 ```
 
 
-Ran a multinomial logistic model to assess differences in kneeling difficulty at 6months followup before vs after introduction of flex bearing
+```{r}
+#| label: tbl-proms1
+#| tbl-cap: "Unadjusted KOOS scores by CR group"
+
+
+TablePROMsSum <- gtsummary::tbl_summary(
+  GMKMaster,
+  include = c(
+    CRTiming,
+    KOOS12_Pain_TotalScore_6months,
+    KOOS12_Pain_TotalScore_Preop,
+    KOOS12_DailyLiving_TotalScore_6months,
+    KOOS12_DailyLiving_TotalScore_Preop,
+  ),
+  by = "CRTiming"
+)
+
+knitr::knit_print(TablePROMsSum)
+
+```
+
+```{r}
+#| label: text-proms-return-rate
+
+return_rate_data <- GMKMaster |>
+  summarise(
+    .by = CRTiming,
+    n_eligible   = n(),
+    n_returned   = sum(!is.na(KOOS12_Pain_TotalScore_6months)),
+    pct_returned = n_returned / n_eligible * 100
+  )
+
+overall_rate <- GMKMaster |>
+  summarise(
+    n_eligible   = n(),
+    n_returned   = sum(!is.na(KOOS12_Pain_TotalScore_6months)),
+    pct_returned = n_returned / n_eligible * 100
+  )
+```
+
+```{epoxy}
+Six-month KOOS-12 Pain scores were available for 
+{overall_rate$n_returned} of {overall_rate$n_eligible} patients, 
+representing an overall 6-month return rate of 
+{round(overall_rate$pct_returned, 1)}%.
+
+When stratified by CR timing group, return rates were as follows:
+{glue::glue_collapse(
+  glue::glue_data(
+    return_rate_data,
+    "{CRTiming}: {n_returned}/{n_eligible} ({round(pct_returned, 1)}%)"
+  ),
+  sep = ", ",
+  last = " and "
+)}.
+```
+
+
+
+An analysis of covariance was implemented to assess differences in subscores at 6months followup before vs after introduction of flex bearing. Adjusted for baseline score, age and sex.
 
 ```{r}
 
@@ -1078,7 +1138,7 @@ ADLPlot4 <- make_adl_plot(ADLPlotData4, KOOS12DailyLivingQ4_6months, "Twisting d
 knitr::knit_print(KneelPlot)
 ```
 
-
+A series of multinomial logistic was implemented to assess differences in subscores at 6months followup before vs after introduction of flex bearing. Adjusted for baseline score, age and sex.
 
 ```{r}
 #| label: fig-model-kneeling1
@@ -1148,7 +1208,7 @@ KneelResults |>
   ) +
   theme_bw()
 ```
-
+A series of binomial model was implemented to compared recategorised responses into binary (high vs low difficulty) with kneeling and other daily tasks between groups. 
 
 ```{r}
 #| label: fig-model-kneeling2
@@ -1200,6 +1260,7 @@ KneelResultsBinom |>
   theme_bw()
 
 ```
+
 
 ```{r}
 #| label: fig-model-sittostand1
